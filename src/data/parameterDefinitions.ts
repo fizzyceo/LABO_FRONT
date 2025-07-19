@@ -220,7 +220,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result > 5',
             config: {
               type: 'range' as const,
               min: 5,
@@ -231,7 +230,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'result_type',
-            condition: 'result_type === "supra"',
             config: {
               type: 'list' as const,
               options: ['normal', 'supra', 'infra'],
@@ -240,7 +238,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'qc',
-            condition: 'qc.includes("abnormal")',
             config: {
               type: 'contains' as const,
               value: 'abnormal',
@@ -255,7 +252,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result >= 12 && result <= 16',
             config: {
               type: 'range' as const,
               min: 12,
@@ -266,7 +262,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'qc',
-            condition: 'qc.includes("normal")',
             config: {
               type: 'contains' as const,
               value: 'normal',
@@ -281,7 +276,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result >= 150 && result <= 450',
             config: {
               type: 'range' as const,
               min: 150,
@@ -303,7 +297,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result < 0.15',
             config: {
               type: 'range' as const,
               min: 0,
@@ -314,7 +307,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'sample_type',
-            condition: 'sample_type === "urine"',
             config: {
               type: 'list' as const,
               options: ['urine'],
@@ -329,7 +321,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result === 0',
             config: {
               type: 'exact' as const,
               value: '0',
@@ -338,7 +329,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'qc',
-            condition: 'qc !== "error"',
             config: {
               type: 'contains' as const,
               value: 'normal',
@@ -358,7 +348,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result < 2.0',
             config: {
               type: 'range' as const,
               min: 0,
@@ -369,7 +358,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'result_type',
-            condition: 'result_type === "normal"',
             config: {
               type: 'list' as const,
               options: ['normal', 'elevated', 'low'],
@@ -384,7 +372,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result >= 0.7 && result <= 1.1',
             config: {
               type: 'range' as const,
               min: 0.7,
@@ -395,7 +382,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'unity',
-            condition: 'unity === "g/L"',
             config: {
               type: 'list' as const,
               options: ['g/L', 'mg/dL', 'mmol/L'],
@@ -415,7 +401,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result >= 4 && result <= 10',
             config: {
               type: 'range' as const,
               min: 4,
@@ -426,7 +411,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'sample_type',
-            condition: 'sample_type === "blood"',
             config: {
               type: 'list' as const,
               options: ['blood', 'plasma'],
@@ -441,7 +425,6 @@ export const algorithmTemplates = {
         subParameters: [
           {
             param: 'result',
-            condition: 'result >= 50 && result <= 70',
             config: {
               type: 'range' as const,
               min: 50,
@@ -452,7 +435,6 @@ export const algorithmTemplates = {
           },
           {
             param: 'qc',
-            condition: 'qc.includes("normal")',
             config: {
               type: 'contains' as const,
               value: 'normal',

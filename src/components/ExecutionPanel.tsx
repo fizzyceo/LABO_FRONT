@@ -74,7 +74,7 @@ const ExecutionPanel: React.FC<ExecutionPanelProps> = ({ algorithms }) => {
           param.subParameters.forEach((subParam) => {
             const passed = Math.random() > 0.2;
             addLog(
-              `  └─ ${subParam.param}: ${subParam.condition} → ${passed ? 'PASS' : 'FAIL'}`,
+              `  └─ ${subParam.param}: ${subParam.config?.type || 'validation'} → ${passed ? 'PASS' : 'FAIL'}`,
               passed ? 'success' : 'error'
             );
           });

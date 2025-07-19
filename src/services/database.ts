@@ -51,9 +51,18 @@ class DatabaseService {
             name: "glucose_sanguin",
             label: "Glucose Sanguin",
             subParameters: [
-              { param: "result", condition: "result > 0.7 && result < 1.1" },
-              { param: "qc", condition: "qc === 'normal'" },
-              { param: "unity", condition: "unity === 'g/L'" }
+              { 
+                param: "result", 
+                config: { type: "range", min: 0.7, max: 1.1, unit: "g/L", required: true }
+              },
+              { 
+                param: "qc", 
+                config: { type: "exact", value: "normal", required: true }
+              },
+              { 
+                param: "unity", 
+                config: { type: "exact", value: "g/L", required: true }
+              }
             ]
           }
         ],
@@ -74,9 +83,18 @@ class DatabaseService {
             name: "cholesterol_total",
             label: "Cholestérol Total",
             subParameters: [
-              { param: "result", condition: "result < 2.0" },
-              { param: "result_type", condition: "result_type === 'normal'" },
-              { param: "patient_age", condition: "patient_age > 18" }
+              { 
+                param: "result", 
+                config: { type: "range", min: 0, max: 2.0, unit: "g/L", required: true }
+              },
+              { 
+                param: "result_type", 
+                config: { type: "exact", value: "normal", required: true }
+              },
+              { 
+                param: "patient_age", 
+                config: { type: "range", min: 18, max: 120, unit: "years", required: true }
+              }
             ]
           }
         ],
@@ -97,9 +115,18 @@ class DatabaseService {
             name: "proteine_urinaire",
             label: "Protéine Urinaire",
             subParameters: [
-              { param: "result", condition: "result < 0.15" },
-              { param: "sample_type", condition: "sample_type === 'urine'" },
-              { param: "qc", condition: "qc !== 'error'" }
+              { 
+                param: "result", 
+                config: { type: "range", min: 0, max: 0.15, unit: "g/L", required: true }
+              },
+              { 
+                param: "sample_type", 
+                config: { type: "exact", value: "urine", required: true }
+              },
+              { 
+                param: "qc", 
+                config: { type: "contains", value: "normal", required: true }
+              }
             ]
           }
         ],
