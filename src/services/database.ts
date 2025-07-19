@@ -18,11 +18,20 @@ class DatabaseService {
     return response.json();
   }
 
+  private async safeApiCall<T>(apiCall: () => Promise<T>, fallback: T): Promise<T> {
+    try {
+      return await apiCall();
+    } catch (error) {
+      console.warn('API call failed, using fallback:', error);
+      return fallback;
+    }
+  }
+
   // Algorithm operations
   async getAlgorithms(): Promise<Algorithm[]> {
     await this.init();
     
-    try {
+    return this.safeApiCall(async () => {
       const response = await fetch(`${this.baseUrl}/algorithms`);
       const algorithms = await this.handleResponse<Algorithm[]>(response);
       
@@ -32,10 +41,7 @@ class DatabaseService {
         created: new Date(alg.created),
         lastModified: new Date(alg.lastModified)
       }));
-    } catch (error) {
-      console.error('Error fetching algorithms:', error);
-      throw error;
-    }
+    }, []);
   }
 
   async getAlgorithm(id: number): Promise<Algorithm> {
@@ -126,7 +132,7 @@ class DatabaseService {
   async getWorkflows(): Promise<Workflow[]> {
     await this.init();
     
-    try {
+    return this.safeApiCall(async () => {
       const response = await fetch(`${this.baseUrl}/workflows`);
       const workflows = await this.handleResponse<Workflow[]>(response);
       
@@ -134,11 +140,7 @@ class DatabaseService {
         ...wf,
         created: new Date(wf.created)
       }));
-    } catch (error) {
-      console.error('Error fetching workflows:', error);
-      // Return empty array if workflows endpoint doesn't exist yet
-      return [];
-    }
+    }, []);
   }
 
   async getWorkflow(id: number): Promise<Workflow> {
