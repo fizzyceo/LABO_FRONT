@@ -1,218 +1,222 @@
 import { Algorithm, Workflow } from '../types';
 
-// Simple in-memory database with localStorage persistence
+// API-based database service that communicates with your CRUD server
 class DatabaseService {
-  private algorithms: Algorithm[] = [];
-  private workflows: Workflow[] = [];
+  private baseUrl = '/api'; // Adjust this if your API is on a different host/port
   private initialized = false;
 
   async init() {
     if (this.initialized) return;
-    
-    try {
-      // Load from localStorage
-      const storedAlgorithms = localStorage.getItem('lab_algorithms');
-      const storedWorkflows = localStorage.getItem('lab_workflows');
-      
-      if (storedAlgorithms) {
-        this.algorithms = JSON.parse(storedAlgorithms).map((alg: any) => ({
-          ...alg,
-          created: new Date(alg.created),
-          lastModified: new Date(alg.lastModified)
-        }));
-      } else {
-        // Load sample data if no stored data
-        this.loadSampleData();
-      }
-      
-      if (storedWorkflows) {
-        this.workflows = JSON.parse(storedWorkflows).map((wf: any) => ({
-          ...wf,
-          created: new Date(wf.created)
-        }));
-      }
-      
-      this.initialized = true;
-    } catch (error) {
-      console.error('Database initialization error:', error);
-      this.loadSampleData();
-      this.initialized = true;
-    }
+    this.initialized = true;
   }
 
-  private loadSampleData() {
-    this.algorithms = [
-      {
-        id: 1,
-        name: "Blood Sugar Validation",
-        description: "Validates blood glucose levels with QC checks",
-        parameters: [
-          {
-            name: "glucose_sanguin",
-            label: "Glucose Sanguin",
-            subParameters: [
-              { 
-                param: "result", 
-                config: { type: "range", min: 0.7, max: 1.1, unit: "g/L", required: true }
-              },
-              { 
-                param: "qc", 
-                config: { type: "exact", value: "normal", required: true }
-              },
-              { 
-                param: "unity", 
-                config: { type: "exact", value: "g/L", required: true }
-              }
-            ]
-          }
-        ],
-        action: "validate",
-        globalParameters: [
-          { name: 'patient_age', value: 45 },
-          { name: 'patient_gender', value: 'M' }
-        ],
-        created: new Date(),
-        lastModified: new Date(),
-      },
-      {
-        id: 2,
-        name: "Cholesterol Analysis",
-        description: "Comprehensive cholesterol level validation",
-        parameters: [
-          {
-            name: "cholesterol_total",
-            label: "Cholestérol Total",
-            subParameters: [
-              { 
-                param: "result", 
-                config: { type: "range", min: 0, max: 2.0, unit: "g/L", required: true }
-              },
-              { 
-                param: "result_type", 
-                config: { type: "exact", value: "normal", required: true }
-              },
-              { 
-                param: "patient_age", 
-                config: { type: "range", min: 18, max: 120, unit: "years", required: true }
-              }
-            ]
-          }
-        ],
-        action: "expert",
-        globalParameters: [
-          { name: 'patient_age', value: 35 },
-          { name: 'patient_gender', value: 'F' }
-        ],
-        created: new Date(),
-        lastModified: new Date(),
-      },
-      {
-        id: 3,
-        name: "Urine Protein Check",
-        description: "Detects protein levels in urine samples",
-        parameters: [
-          {
-            name: "proteine_urinaire",
-            label: "Protéine Urinaire",
-            subParameters: [
-              { 
-                param: "result", 
-                config: { type: "range", min: 0, max: 0.15, unit: "g/L", required: true }
-              },
-              { 
-                param: "sample_type", 
-                config: { type: "exact", value: "urine", required: true }
-              },
-              { 
-                param: "qc", 
-                config: { type: "contains", value: "normal", required: true }
-              }
-            ]
-          }
-        ],
-        action: "validate",
-        globalParameters: [
-          { name: 'patient_age', value: 28 },
-          { name: 'patient_gender', value: 'F' }
-        ],
-        created: new Date(),
-        lastModified: new Date(),
-      },
-    ];
-  }
-
-  private saveToStorage() {
-    try {
-      localStorage.setItem('lab_algorithms', JSON.stringify(this.algorithms));
-      localStorage.setItem('lab_workflows', JSON.stringify(this.workflows));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
+  private async handleResponse<T>(response: Response): Promise<T> {
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API Error ${response.status}: ${errorText}`);
     }
+    return response.json();
   }
 
   // Algorithm operations
   async getAlgorithms(): Promise<Algorithm[]> {
     await this.init();
-    return [...this.algorithms];
+    
+    try {
+      const response = await fetch(`${this.baseUrl}/algorithms`);
+      const algorithms = await this.handleResponse<Algorithm[]>(response);
+      
+      // Ensure dates are properly converted
+      return algorithms.map(alg => ({
+        ...alg,
+        created: new Date(alg.created),
+        lastModified: new Date(alg.lastModified)
+      }));
+    } catch (error) {
+      console.error('Error fetching algorithms:', error);
+      throw error;
+    }
+  }
+
+  async getAlgorithm(id: number): Promise<Algorithm> {
+    await this.init();
+    
+    try {
+      const response = await fetch(`${this.baseUrl}/algorithms/${id}`);
+      const algorithm = await this.handleResponse<Algorithm>(response);
+      
+      return {
+        ...algorithm,
+        created: new Date(algorithm.created),
+        lastModified: new Date(algorithm.lastModified)
+      };
+    } catch (error) {
+      console.error('Error fetching algorithm:', error);
+      throw error;
+    }
   }
 
   async saveAlgorithm(algorithm: Algorithm): Promise<Algorithm> {
     await this.init();
     
-    const existingIndex = this.algorithms.findIndex(a => a.id === algorithm.id);
-    
-    if (existingIndex >= 0) {
-      this.algorithms[existingIndex] = { ...algorithm, lastModified: new Date() };
-    } else {
-      const newAlgorithm = { 
-        ...algorithm, 
-        id: Date.now(),
-        created: new Date(),
-        lastModified: new Date()
+    try {
+      let response: Response;
+      
+      if (algorithm.id && algorithm.id > 0) {
+        // Update existing algorithm
+        response = await fetch(`${this.baseUrl}/algorithms/${algorithm.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...algorithm,
+            lastModified: new Date()
+          }),
+        });
+      } else {
+        // Create new algorithm
+        const newAlgorithm = {
+          ...algorithm,
+          created: new Date(),
+          lastModified: new Date()
+        };
+        
+        response = await fetch(`${this.baseUrl}/algorithms`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newAlgorithm),
+        });
+      }
+      
+      const savedAlgorithm = await this.handleResponse<Algorithm>(response);
+      
+      return {
+        ...savedAlgorithm,
+        created: new Date(savedAlgorithm.created),
+        lastModified: new Date(savedAlgorithm.lastModified)
       };
-      this.algorithms.push(newAlgorithm);
+    } catch (error) {
+      console.error('Error saving algorithm:', error);
+      throw error;
     }
-    
-    this.saveToStorage();
-    return algorithm;
   }
 
   async deleteAlgorithm(id: number): Promise<void> {
     await this.init();
-    this.algorithms = this.algorithms.filter(a => a.id !== id);
-    this.saveToStorage();
+    
+    try {
+      const response = await fetch(`${this.baseUrl}/algorithms/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error ${response.status}: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error deleting algorithm:', error);
+      throw error;
+    }
   }
 
-  // Workflow operations
+  // Workflow operations (assuming similar endpoints exist for workflows)
   async getWorkflows(): Promise<Workflow[]> {
     await this.init();
-    return [...this.workflows];
+    
+    try {
+      const response = await fetch(`${this.baseUrl}/workflows`);
+      const workflows = await this.handleResponse<Workflow[]>(response);
+      
+      return workflows.map(wf => ({
+        ...wf,
+        created: new Date(wf.created)
+      }));
+    } catch (error) {
+      console.error('Error fetching workflows:', error);
+      // Return empty array if workflows endpoint doesn't exist yet
+      return [];
+    }
+  }
+
+  async getWorkflow(id: number): Promise<Workflow> {
+    await this.init();
+    
+    try {
+      const response = await fetch(`${this.baseUrl}/workflows/${id}`);
+      const workflow = await this.handleResponse<Workflow>(response);
+      
+      return {
+        ...workflow,
+        created: new Date(workflow.created)
+      };
+    } catch (error) {
+      console.error('Error fetching workflow:', error);
+      throw error;
+    }
   }
 
   async saveWorkflow(workflow: Workflow): Promise<Workflow> {
     await this.init();
     
-    const existingIndex = this.workflows.findIndex(w => w.id === workflow.id);
-    
-    if (existingIndex >= 0) {
-      this.workflows[existingIndex] = workflow;
-    } else {
-      const newWorkflow = { 
-        ...workflow, 
-        id: Date.now(),
-        created: new Date()
+    try {
+      let response: Response;
+      
+      if (workflow.id && workflow.id > 0) {
+        // Update existing workflow
+        response = await fetch(`${this.baseUrl}/workflows/${workflow.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(workflow),
+        });
+      } else {
+        // Create new workflow
+        const newWorkflow = {
+          ...workflow,
+          created: new Date()
+        };
+        
+        response = await fetch(`${this.baseUrl}/workflows`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newWorkflow),
+        });
+      }
+      
+      const savedWorkflow = await this.handleResponse<Workflow>(response);
+      
+      return {
+        ...savedWorkflow,
+        created: new Date(savedWorkflow.created)
       };
-      this.workflows.push(newWorkflow);
+    } catch (error) {
+      console.error('Error saving workflow:', error);
+      throw error;
     }
-    
-    this.saveToStorage();
-    return workflow;
   }
 
   async deleteWorkflow(id: number): Promise<void> {
     await this.init();
-    this.workflows = this.workflows.filter(w => w.id !== id);
-    this.saveToStorage();
+    
+    try {
+      const response = await fetch(`${this.baseUrl}/workflows/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error ${response.status}: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error deleting workflow:', error);
+      throw error;
+    }
   }
 }
 

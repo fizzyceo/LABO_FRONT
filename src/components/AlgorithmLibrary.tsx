@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, Settings } from 'lucide-react';
+import { Plus, Calendar, Settings, Trash2 } from 'lucide-react';
 import { Algorithm, Workflow } from '../types';
 import { database } from '../services/database';
 import Modal from './Modal';
@@ -26,7 +26,7 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
 
   const handleCreateAlgorithm = (algorithmData: any) => {
     const newAlgorithm: Algorithm = {
-      id: Date.now(),
+      id: 0, // Let the server assign the ID
       name: algorithmData.name,
       description: algorithmData.description,
       parameters: [],
@@ -48,7 +48,7 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
 
   const handleCreateWorkflow = (workflowData: any) => {
     const newWorkflow: Workflow = {
-      id: Date.now(),
+      id: 0, // Let the server assign the ID
       name: workflowData.name,
       algorithmOrder: workflowData.algorithmOrder,
       created: new Date(),
@@ -61,6 +61,36 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
       console.error('Error creating workflow:', error);
       alert('Error creating workflow');
     });
+  };
+
+  const handleDeleteAlgorithm = async (algorithm: Algorithm, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (confirm(`Are you sure you want to delete "${algorithm.name}"?`)) {
+      try {
+        await database.deleteAlgorithm(algorithm.id);
+        const updatedAlgorithms = await database.getAlgorithms();
+        setAlgorithms(updatedAlgorithms);
+      } catch (error) {
+        console.error('Error deleting algorithm:', error);
+        alert('Error deleting algorithm');
+      }
+    }
+  };
+
+  const handleDeleteWorkflow = async (workflow: Workflow, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (confirm(`Are you sure you want to delete "${workflow.name}"?`)) {
+      try {
+        await database.deleteWorkflow(workflow.id);
+        const updatedWorkflows = await database.getWorkflows();
+        setWorkflows(updatedWorkflows);
+      } catch (error) {
+        console.error('Error deleting workflow:', error);
+        alert('Error deleting workflow');
+      }
+    }
   };
 
   return (
@@ -82,14 +112,29 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
           {algorithms.map((algorithm) => (
             <div
               key={algorithm.id}
-              onClick={() => onEditAlgorithm(algorithm)}
               className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-indigo-400 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
             >
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">{algorithm.name}</h3>
+              <div className="flex justify-between items-start mb-2">
+                <h3 
+                  className="text-lg font-semibold text-gray-800 flex-1 cursor-pointer"
+                  onClick={() => onEditAlgorithm(algorithm)}
+                >
+                  {algorithm.name}
+                </h3>
+                <button
+                  onClick={(e) => handleDeleteAlgorithm(algorithm, e)}
+                  className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
+                  title="Delete algorithm"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <div onClick={() => onEditAlgorithm(algorithm)}>
               <p className="text-gray-600 text-sm mb-4">{algorithm.description}</p>
               <div className="flex justify-between items-center text-xs text-gray-500">
                 <span>{algorithm.parameters.reduce((total, param) => total + param.subParameters.length, 0)} sub-parameters</span>
                 <span className="capitalize">Action: {algorithm.action}</span>
+              </div>
               </div>
             </div>
           ))}
@@ -121,9 +166,20 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
             return (
               <div
                 key={workflow.id}
-                className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-teal-400 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-teal-400 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
               >
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{workflow.name}</h3>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-lg font-semibold text-gray-800 flex-1">
+                    {workflow.name}
+                  </h3>
+                  <button
+                    onClick={(e) => handleDeleteWorkflow(workflow, e)}
+                    className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
+                    title="Delete workflow"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
                 <p className="text-gray-600 text-sm mb-4">Order: {algorithmNames}</p>
                 <div className="flex justify-between items-center text-xs text-gray-500">
                   <span>{workflow.algorithmOrder.length} steps</span>

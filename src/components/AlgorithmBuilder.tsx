@@ -100,7 +100,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
     );
 
     const newAlgorithm: Algorithm = {
-      id: currentAlgorithmId || Date.now(),
+      id: currentAlgorithmId || 0, // Let server assign ID for new algorithms
       name,
       description,
       parameters: validParameters,
@@ -113,16 +113,19 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
     database
       .saveAlgorithm(newAlgorithm)
       .then(() => {
-        database.getAlgorithms().then(setAlgorithms);
+        return database.getAlgorithms();
+      })
+      .then(setAlgorithms)
+      .then(() => {
         clearBuilder();
-        alert(currentAlgorithmId ? "Algorithm updated successfully!" : "Algorithm saved successfully!");
+        alert(currentAlgorithmId ? "Algorithm updated successfully!" : "Algorithm created successfully!");
         if (onAlgorithmSaved) {
           onAlgorithmSaved();
         }
       })
       .catch((error) => {
         console.error("Error saving algorithm:", error);
-        alert("Error saving algorithm");
+        alert(`Error saving algorithm: ${error.message}`);
       });
   };
 

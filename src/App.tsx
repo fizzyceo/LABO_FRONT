@@ -18,8 +18,22 @@ function App() {
 
   useEffect(() => {
     // Load data from database on app start
-    database.getAlgorithms().then(setAlgorithms).catch(console.error);
-    database.getWorkflows().then(setWorkflows).catch(console.error);
+    const loadData = async () => {
+      try {
+        const [algorithmsData, workflowsData] = await Promise.all([
+          database.getAlgorithms(),
+          database.getWorkflows()
+        ]);
+        setAlgorithms(algorithmsData);
+        setWorkflows(workflowsData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        // Show user-friendly error message
+        alert('Error connecting to server. Please check if your API server is running.');
+      }
+    };
+    
+    loadData();
   }, []);
 
   const handleEditAlgorithm = (algorithm?: Algorithm) => {
