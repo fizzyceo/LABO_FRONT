@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Calendar, Settings } from 'lucide-react';
 import { Algorithm, Workflow } from '../types';
-import { mongoDatabase } from '../services/mongoDatabase';
+import { database } from '../services/database';
 import Modal from './Modal';
 import AlgorithmForm from './AlgorithmForm';
 import WorkflowForm from './WorkflowForm';
@@ -36,8 +36,8 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
       lastModified: new Date(),
     };
     
-    mongoDatabase.saveAlgorithm(newAlgorithm).then(() => {
-      mongoDatabase.getAlgorithms().then(setAlgorithms);
+    database.saveAlgorithm(newAlgorithm).then(() => {
+      database.getAlgorithms().then(setAlgorithms);
       setShowAlgorithmModal(false);
       onEditAlgorithm();
     }).catch(error => {
@@ -54,8 +54,8 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
       created: new Date(),
     };
     
-    mongoDatabase.saveWorkflow(newWorkflow).then(() => {
-      mongoDatabase.getWorkflows().then(setWorkflows);
+    database.saveWorkflow(newWorkflow).then(() => {
+      database.getWorkflows().then(setWorkflows);
       setShowWorkflowModal(false);
     }).catch(error => {
       console.error('Error creating workflow:', error);
