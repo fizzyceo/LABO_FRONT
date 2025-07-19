@@ -1,0 +1,168 @@
+import React, { useState } from 'react';
+import { Plus, Calendar, Settings } from 'lucide-react';
+import { Algorithm, Workflow } from '../types';
+import { database } from '../services/database';
+import Modal from './Modal';
+import AlgorithmForm from './AlgorithmForm';
+import WorkflowForm from './WorkflowForm';
+
+interface AlgorithmLibraryProps {
+  algorithms: Algorithm[];
+  workflows: Workflow[];
+  setAlgorithms: (algorithms: Algorithm[]) => void;
+  setWorkflows: (workflows: Workflow[]) => void;
+  onEditAlgorithm: () => void;
+}
+
+const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
+  algorithms,
+  workflows,
+  setAlgorithms,
+  setWorkflows,
+  onEditAlgorithm,
+}) => {
+  const [showAlgorithmModal, setShowAlgorithmModal] = useState(false);
+  const [showWorkflowModal, setShowWorkflowModal] = useState(false);
+
+  const handleCreateAlgorithm = (algorithmData: any) => {
+    const newAlgorithm: Algorithm = {
+      id: Date.now(),
+      name: algorithmData.name,
+      description: algorithmData.description,
+      parameters: [],
+      action: 'validate',
+      globalParameters: [],
+      created: new Date(),
+      lastModified: new Date(),
+    };
+    
+    database.saveAlgorithm(newAlgorithm).then(() => {
+      database.getAlgorithms().then(setAlgorithms);
+      setShowAlgorithmModal(false);
+      onEditAlgorithm();
+    }).catch(error => {
+      console.error('Error creating algorithm:', error);
+      alert('Error creating algorithm');
+    });
+  };
+
+  const handleCreateWorkflow = (workflowData: any) => {
+    const newWorkflow: Workflow = {
+      id: Date.now(),
+      name: workflowData.name,
+      algorithmOrder: workflowData.algorithmOrder,
+      created: new Date(),
+    };
+    
+    database.saveWorkflow(newWorkflow).then(() => {
+      database.getWorkflows().then(setWorkflows);
+      setShowWorkflowModal(false);
+    }).catch(error => {
+      console.error('Error creating workflow:', error);
+      alert('Error creating workflow');
+    });
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Algorithm Library */}
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 hover:transform hover:-translate-y-1 transition-all duration-300">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Analysis Library</h2>
+          <button
+            onClick={() => setShowAlgorithmModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-medium hover:transform hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300"
+          >
+            <Plus className="w-4 h-4" />
+            New Analysis
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {algorithms.map((algorithm) => (
+            <div
+              key={algorithm.id}
+              onClick={onEditAlgorithm}
+              className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-indigo-400 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{algorithm.name}</h3>
+              <p className="text-gray-600 text-sm mb-4">{algorithm.description}</p>
+              <div className="flex justify-between items-center text-xs text-gray-500">
+                <span>{algorithm.parameters.reduce((total, param) => total + param.subParameters.length, 0)} sub-parameters</span>
+                <span className="capitalize">Action: {algorithm.action}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Workflow Library */}
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 hover:transform hover:-translate-y-1 transition-all duration-300">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Workflow Library</h2>
+          <button
+            onClick={() => setShowWorkflowModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-medium hover:transform hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300"
+          >
+            <Plus className="w-4 h-4" />
+            New Workflow
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {workflows.map((workflow) => {
+            const algorithmNames = workflow.algorithmOrder
+              .map((id) => {
+                const alg = algorithms.find((a) => a.id === id);
+                return alg ? alg.name : '(Deleted)';
+              })
+              .join(' → ');
+
+            return (
+              <div
+                key={workflow.id}
+                className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-teal-400 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
+              >
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">{workflow.name}</h3>
+                <p className="text-gray-600 text-sm mb-4">Order: {algorithmNames}</p>
+                <div className="flex justify-between items-center text-xs text-gray-500">
+                  <span>{workflow.algorithmOrder.length} steps</span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {new Date(workflow.created).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Modals */}
+      <Modal
+        isOpen={showAlgorithmModal}
+        onClose={() => setShowAlgorithmModal(false)}
+        title="Create New Algorithm"
+      >
+        <AlgorithmForm
+          onSubmit={handleCreateAlgorithm}
+          onCancel={() => setShowAlgorithmModal(false)}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showWorkflowModal}
+        onClose={() => setShowWorkflowModal(false)}
+        title="Create New Workflow"
+      >
+        <WorkflowForm
+          algorithms={algorithms}
+          onSubmit={handleCreateWorkflow}
+          onCancel={() => setShowWorkflowModal(false)}
+        />
+      </Modal>
+    </div>
+  );
+};
+
+export default AlgorithmLibrary;
