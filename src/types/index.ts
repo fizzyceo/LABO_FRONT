@@ -1,9 +1,10 @@
 export interface Algorithm {
-  id: number;
+  id?: number;
+  _id: string; // MongoDB ObjectId
   name: string;
   description: string;
   parameters: Parameter[];
-  action: 'validate' | 'expert' | 'conditional';
+  action: "validate" | "expert" | "conditional";
   globalParameters: GlobalParameterValue[];
   created: Date;
   lastModified: Date;
@@ -21,7 +22,7 @@ export interface SubParameter {
 }
 
 export interface ParameterConfig {
-  type: 'range' | 'exact' | 'contains' | 'boolean' | 'list';
+  type: "range" | "exact" | "contains" | "boolean" | "list";
   min?: number;
   max?: number;
   value?: string | number | boolean;
@@ -33,7 +34,7 @@ export interface ParameterConfig {
 export interface ParameterDefinition {
   name: string;
   label: string;
-  type: 'range' | 'exact' | 'contains' | 'boolean' | 'list';
+  type: "range" | "exact" | "contains" | "boolean" | "list";
   defaultConfig: ParameterConfig;
   isGlobal: boolean;
   category: string;
@@ -54,13 +55,13 @@ export interface Mapping {
 export interface ExecutionLog {
   timestamp: string;
   message: string;
-  type?: 'info' | 'success' | 'error' | 'warning';
+  type?: "info" | "success" | "error" | "warning";
 }
 
 export interface GlobalParameter {
   name: string;
   label: string;
-  type: 'range' | 'list';
+  type: "range" | "list";
   defaultValue: any;
   options?: string[];
   min?: number;

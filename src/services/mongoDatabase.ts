@@ -1,166 +1,105 @@
-import { MongoClient, Db, Collection } from 'mongodb';
-import { Algorithm, Workflow } from '../types';
+// services/mongoApiService.ts
+import { Algorithm, Workflow } from "../types";
 
-class MongoDBService {
-  private client: MongoClient;
-  private db: Db | null = null;
-  private algorithmsCollection: Collection<Algorithm> | null = null;
-  private workflowsCollection: Collection<Workflow> | null = null;
-  private connected = false;
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:3001/api";
 
-  constructor() {
-    const uri = 'mongodb+srv://workingdev0:EnMojEneJr0FFwTm@labocluster.hwzcnm2.mongodb.net/?retryWrites=true&w=majority&appName=LABOCluster';
-    this.client = new MongoClient(uri);
-  }
-
-  async connect() {
-    if (this.connected) return;
-    
+class MongoApiService {
+  private async request<T>(
+    endpoint: string,
+    options?: RequestInit
+  ): Promise<T> {
     try {
-      await this.client.connect();
-      this.db = this.client.db('laboratory_platform');
-      this.algorithmsCollection = this.db.collection<Algorithm>('algorithms');
-      this.workflowsCollection = this.db.collection<Workflow>('workflows');
-      this.connected = true;
-      console.log('Connected to MongoDB Atlas');
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...options?.headers,
+        },
+        ...options,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `API request failed: ${response.statusText}`
+        );
+      }
+
+      return response.json();
     } catch (error) {
-      console.error('MongoDB connection error:', error);
+      console.error(`API request error for ${endpoint}:`, error);
       throw error;
     }
   }
 
-  async disconnect() {
-    if (this.connected) {
-      await this.client.close();
-      this.connected = false;
-    }
+  // Algorithm methods
+  async getAlgorithms(): Promise<Algorithm[]> {
+    return this.request<Algorithm[]>("/algorithms");
   }
 
-  // Algorithm operations
-  async getAlgorithms(): Promise<Algorithm[]> {
-    await this.connect();
-    if (!this.algorithmsCollection) throw new Error('Database not connected');
-    
-    try {
-      const algorithms = await this.algorithmsCollection.find({}).toArray();
-      return algorithms.map(alg => ({
-        ...alg,
-        created: new Date(alg.created),
-        lastModified: new Date(alg.lastModified)
-      }));
-    } catch (error) {
-      console.error('Error fetching algorithms:', error);
-      return [];
-    }
+  async getAlgorithm(id: string): Promise<Algorithm> {
+    return this.request<Algorithm>(`/algorithms/${id}`);
   }
 
   async saveAlgorithm(algorithm: Algorithm): Promise<Algorithm> {
-    await this.connect();
-    if (!this.algorithmsCollection) throw new Error('Database not connected');
-    
-    try {
-      const now = new Date();
-      
-      if (algorithm.id) {
-        // Update existing algorithm
-        const updateData = {
-          ...algorithm,
-          lastModified: now
-        };
-        
-        await this.algorithmsCollection.replaceOne(
-          { id: algorithm.id },
-          updateData,
-          { upsert: true }
-        );
-        
-        return updateData;
-      } else {
-        // Create new algorithm
-        const newAlgorithm = {
-          ...algorithm,
-          id: Date.now(),
-          created: now,
-          lastModified: now
-        };
-        
-        await this.algorithmsCollection.insertOne(newAlgorithm);
-        return newAlgorithm;
-      }
-    } catch (error) {
-      console.error('Error saving algorithm:', error);
-      throw error;
+    if (algorithm.id && typeof algorithm.id === "string") {
+      // Update existing algorithm (MongoDB ObjectId is 24 characters)
+      return this.request<Algorithm>(`/algorithms/${algorithm.id}`, {
+        method: "PUT",
+        body: JSON.stringify(algorithm),
+      });
+    } else {
+      // Create new algorithm
+      const { id, ...algorithmData } = algorithm; // Remove id for creation
+      return this.request<Algorithm>("/algorithms", {
+        method: "POST",
+        body: JSON.stringify(algorithmData),
+      });
     }
   }
 
-  async deleteAlgorithm(id: number): Promise<void> {
-    await this.connect();
-    if (!this.algorithmsCollection) throw new Error('Database not connected');
-    
-    try {
-      await this.algorithmsCollection.deleteOne({ id });
-    } catch (error) {
-      console.error('Error deleting algorithm:', error);
-      throw error;
-    }
+  async deleteAlgorithm(id: string): Promise<void> {
+    await this.request(`/algorithms/${id}`, {
+      method: "DELETE",
+    });
   }
 
-  // Workflow operations
+  // Workflow methods
   async getWorkflows(): Promise<Workflow[]> {
-    await this.connect();
-    if (!this.workflowsCollection) throw new Error('Database not connected');
-    
-    try {
-      const workflows = await this.workflowsCollection.find({}).toArray();
-      return workflows.map(wf => ({
-        ...wf,
-        created: new Date(wf.created)
-      }));
-    } catch (error) {
-      console.error('Error fetching workflows:', error);
-      return [];
-    }
+    return this.request<Workflow[]>("/workflows");
+  }
+
+  async getWorkflow(id: string): Promise<Workflow> {
+    return this.request<Workflow>(`/workflows/${id}`);
   }
 
   async saveWorkflow(workflow: Workflow): Promise<Workflow> {
-    await this.connect();
-    if (!this.workflowsCollection) throw new Error('Database not connected');
-    
-    try {
-      if (workflow.id) {
-        await this.workflowsCollection.replaceOne(
-          { id: workflow.id },
-          workflow,
-          { upsert: true }
-        );
-        return workflow;
-      } else {
-        const newWorkflow = {
-          ...workflow,
-          id: Date.now(),
-          created: new Date()
-        };
-        
-        await this.workflowsCollection.insertOne(newWorkflow);
-        return newWorkflow;
-      }
-    } catch (error) {
-      console.error('Error saving workflow:', error);
-      throw error;
+    if (workflow.id && typeof workflow.id === "string") {
+      // Update existing workflow
+      return this.request<Workflow>(`/workflows/${workflow.id}`, {
+        method: "PUT",
+        body: JSON.stringify(workflow),
+      });
+    } else {
+      // Create new workflow
+      const { id, ...workflowData } = workflow;
+      return this.request<Workflow>("/workflows", {
+        method: "POST",
+        body: JSON.stringify(workflowData),
+      });
     }
   }
 
-  async deleteWorkflow(id: number): Promise<void> {
-    await this.connect();
-    if (!this.workflowsCollection) throw new Error('Database not connected');
-    
-    try {
-      await this.workflowsCollection.deleteOne({ id });
-    } catch (error) {
-      console.error('Error deleting workflow:', error);
-      throw error;
-    }
+  async deleteWorkflow(id: string): Promise<void> {
+    await this.request(`/workflows/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  // Health check
+  async checkHealth(): Promise<{ status: string; timestamp: string }> {
+    return this.request<{ status: string; timestamp: string }>("/health");
   }
 }
 
-export const mongoDatabase = new MongoDBService();
+export const mongoApiService = new MongoApiService();

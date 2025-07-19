@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import Header from './components/Header';
-import AlgorithmLibrary from './components/AlgorithmLibrary';
-import AlgorithmBuilder from './components/AlgorithmBuilder';
-import WebScraper from './components/WebScraper';
-import ExecutionPanel from './components/ExecutionPanel';
-import FloatingActions from './components/FloatingActions';
-import { database } from './services/database';
-import { Algorithm, Workflow } from './types';
+import React, { useState } from "react";
+import { useEffect } from "react";
+import Header from "./components/Header";
+import AlgorithmLibrary from "./components/AlgorithmLibrary";
+import AlgorithmBuilder from "./components/AlgorithmBuilder";
+import WebScraper from "./components/WebScraper";
+import ExecutionPanel from "./components/ExecutionPanel";
+import FloatingActions from "./components/FloatingActions";
+import { database } from "./services/database";
+import { Algorithm, Workflow } from "./types";
 
 function App() {
-  const [activeTab, setActiveTab] = useState('algorithms');
+  const [activeTab, setActiveTab] = useState("algorithms");
   const [algorithms, setAlgorithms] = useState<Algorithm[]>([]);
-  const [editingAlgorithm, setEditingAlgorithm] = useState<Algorithm | null>(null);
-  
+  const [editingAlgorithm, setEditingAlgorithm] = useState<Algorithm | null>(
+    null
+  );
+
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
   useEffect(() => {
@@ -21,28 +23,30 @@ function App() {
     const loadData = async () => {
       const [algorithmsData, workflowsData] = await Promise.all([
         database.getAlgorithms(),
-        database.getWorkflows()
+        database.getWorkflows(),
       ]);
+      console.log("Loaded algorithms:", algorithmsData);
+
       setAlgorithms(algorithmsData);
       setWorkflows(workflowsData);
     };
-    
+
     loadData();
   }, []);
 
   const handleEditAlgorithm = (algorithm?: Algorithm) => {
     setEditingAlgorithm(algorithm || null);
-    setActiveTab('builder');
+    setActiveTab("builder");
   };
 
   const handleAlgorithmSaved = () => {
     setEditingAlgorithm(null);
-    setActiveTab('algorithms');
+    setActiveTab("algorithms");
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'algorithms':
+      case "algorithms":
         return (
           <AlgorithmLibrary
             algorithms={algorithms}
@@ -52,7 +56,7 @@ function App() {
             onEditAlgorithm={handleEditAlgorithm}
           />
         );
-      case 'builder':
+      case "builder":
         return (
           <AlgorithmBuilder
             algorithms={algorithms}
@@ -61,9 +65,9 @@ function App() {
             onAlgorithmSaved={handleAlgorithmSaved}
           />
         );
-      case 'scraper':
+      case "scraper":
         return <WebScraper />;
-      case 'execution':
+      case "execution":
         return <ExecutionPanel algorithms={algorithms} />;
       default:
         return null;
@@ -73,14 +77,14 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-800 overflow-x-hidden">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {renderTabContent()}
       </div>
 
       <FloatingActions
-        onQuickBuilder={() => setActiveTab('builder')}
-        onQuickRun={() => setActiveTab('execution')}
+        onQuickBuilder={() => setActiveTab("builder")}
+        onQuickRun={() => setActiveTab("execution")}
       />
     </div>
   );
