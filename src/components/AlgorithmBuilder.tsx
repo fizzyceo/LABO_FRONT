@@ -6,7 +6,7 @@ import {
   algorithmTemplates,
 } from "../data/parameterDefinitions";
 import { globalParameters } from "../data/globalParameters";
-import { mongoDatabase } from "../services/mongoDatabase";
+import { database } from "../services/database";
 import ParameterConfigForm from "./ParameterConfigForm";
 import GlobalParametersForm from "./GlobalParametersForm";
 
@@ -110,10 +110,10 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       lastModified: new Date(),
     };
 
-    mongoDatabase
+    database
       .saveAlgorithm(newAlgorithm)
       .then(() => {
-        mongoDatabase.getAlgorithms().then(setAlgorithms);
+        database.getAlgorithms().then(setAlgorithms);
         clearBuilder();
         alert(currentAlgorithmId ? "Algorithm updated successfully!" : "Algorithm saved successfully!");
         if (onAlgorithmSaved) {

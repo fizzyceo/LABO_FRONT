@@ -18,8 +18,8 @@ function App() {
 
   useEffect(() => {
     // Load data from database on app start
-    mongoDatabase.getAlgorithms().then(setAlgorithms).catch(console.error);
-    mongoDatabase.getWorkflows().then(setWorkflows).catch(console.error);
+    database.getAlgorithms().then(setAlgorithms).catch(console.error);
+    database.getWorkflows().then(setWorkflows).catch(console.error);
   }, []);
 
   const handleEditAlgorithm = (algorithm?: Algorithm) => {
