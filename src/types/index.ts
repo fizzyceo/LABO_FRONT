@@ -17,7 +17,6 @@ export interface Parameter {
 
 export interface SubParameter {
   param: string;
-  condition: string;
   config?: ParameterConfig;
 }
 
