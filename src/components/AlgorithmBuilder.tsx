@@ -6,7 +6,7 @@ import {
   algorithmTemplates,
 } from "../data/parameterDefinitions";
 import { globalParameters } from "../data/globalParameters";
-import { database } from "../services/database";
+import { mongoDatabase } from "../services/mongoDatabase";
 import ParameterConfigForm from "./ParameterConfigForm";
 import GlobalParametersForm from "./GlobalParametersForm";
 
@@ -22,7 +22,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState<Parameter[]>([
-    { name: "", label: "", subParameters: [] },
+    { name: "", label: "", subParameters: [{ param: "", config: { type: "exact", required: false } }] },
   ]);
   const [action, setAction] = useState<"validate" | "expert" | "conditional">(
     "validate"
@@ -41,13 +41,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       {
         name: "",
         label: "",
-        subParameters: [
-          {
-            param: "",
-            condition: "",
-            config: { type: "exact", required: false },
-          },
-        ],
+        subParameters: [{ param: "", config: { type: "exact", required: false } }],
       },
     ]);
   };
@@ -69,7 +63,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   const clearBuilder = () => {
     setName("");
     setDescription("");
-    setParameters([{ name: "", label: "", subParameters: [] }]);
+    setParameters([{ name: "", label: "", subParameters: [{ param: "", config: { type: "exact", required: false } }] }]);
     setAction("validate");
     setSelectedTemplate("");
     setGlobalParameterValues(
@@ -98,10 +92,10 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       lastModified: new Date(),
     };
 
-    database
+    mongoDatabase
       .saveAlgorithm(newAlgorithm)
       .then(() => {
-        database.getAlgorithms().then(setAlgorithms);
+        mongoDatabase.getAlgorithms().then(setAlgorithms);
         clearBuilder();
         alert("Algorithm saved successfully!");
       })
@@ -258,7 +252,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
                         className="p-3 bg-gray-50 rounded-lg border border-gray-200"
                       >
                         <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 items-end">
-                          <div>
+                          <div className="lg:col-span-2">
                             <label className="block text-xs font-medium text-gray-600 mb-1">
                               Parameter
                             </label>
@@ -281,26 +275,6 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
                                 </option>
                               ))}
                             </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 mb-1">
-                              Condition
-                            </label>
-                            <input
-                              type="text"
-                              value={subParam.condition}
-                              onChange={(e) => {
-                                const updated = [...parameters];
-                                updated[index].subParameters[subIndex] = {
-                                  ...updated[index].subParameters[subIndex],
-                                  condition: e.target.value,
-                                };
-                                setParameters(updated);
-                              }}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:outline-none font-mono"
-                              placeholder="e.g., result > 5"
-                            />
                           </div>
 
                           <div>
@@ -345,7 +319,6 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
                       const updated = [...parameters];
                       updated[index].subParameters.push({
                         param: "",
-                        condition: "",
                         config: { type: "exact", required: false },
                       });
                       setParameters(updated);

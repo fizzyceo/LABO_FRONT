@@ -6,7 +6,7 @@ import AlgorithmBuilder from './components/AlgorithmBuilder';
 import WebScraper from './components/WebScraper';
 import ExecutionPanel from './components/ExecutionPanel';
 import FloatingActions from './components/FloatingActions';
-import { database } from './services/database';
+import { mongoDatabase } from './services/mongoDatabase';
 import { Algorithm, Workflow } from './types';
 
 function App() {
@@ -17,8 +17,8 @@ function App() {
 
   useEffect(() => {
     // Load data from database on app start
-    database.getAlgorithms().then(setAlgorithms);
-    database.getWorkflows().then(setWorkflows);
+    mongoDatabase.getAlgorithms().then(setAlgorithms).catch(console.error);
+    mongoDatabase.getWorkflows().then(setWorkflows).catch(console.error);
   }, []);
 
   const renderTabContent = () => {
