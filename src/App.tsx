@@ -12,14 +12,25 @@ import { Algorithm, Workflow } from './types';
 function App() {
   const [activeTab, setActiveTab] = useState('algorithms');
   const [algorithms, setAlgorithms] = useState<Algorithm[]>([]);
+  const [editingAlgorithm, setEditingAlgorithm] = useState<Algorithm | null>(null);
   
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
   useEffect(() => {
     // Load data from database on app start
-    database.getAlgorithms().then(setAlgorithms).catch(console.error);
-    database.getWorkflows().then(setWorkflows).catch(console.error);
+    mongoDatabase.getAlgorithms().then(setAlgorithms).catch(console.error);
+    mongoDatabase.getWorkflows().then(setWorkflows).catch(console.error);
   }, []);
+
+  const handleEditAlgorithm = (algorithm?: Algorithm) => {
+    setEditingAlgorithm(algorithm || null);
+    setActiveTab('builder');
+  };
+
+  const handleAlgorithmSaved = () => {
+    setEditingAlgorithm(null);
+    setActiveTab('algorithms');
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -30,7 +41,7 @@ function App() {
             workflows={workflows}
             setAlgorithms={setAlgorithms}
             setWorkflows={setWorkflows}
-            onEditAlgorithm={() => setActiveTab('builder')}
+            onEditAlgorithm={handleEditAlgorithm}
           />
         );
       case 'builder':
@@ -38,6 +49,8 @@ function App() {
           <AlgorithmBuilder
             algorithms={algorithms}
             setAlgorithms={setAlgorithms}
+            editingAlgorithm={editingAlgorithm}
+            onAlgorithmSaved={handleAlgorithmSaved}
           />
         );
       case 'scraper':

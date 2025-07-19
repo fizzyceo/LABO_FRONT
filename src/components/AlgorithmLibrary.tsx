@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Calendar, Settings } from 'lucide-react';
 import { Algorithm, Workflow } from '../types';
-import { database } from '../services/database';
+import { mongoDatabase } from '../services/mongoDatabase';
 import Modal from './Modal';
 import AlgorithmForm from './AlgorithmForm';
 import WorkflowForm from './WorkflowForm';
@@ -11,7 +11,7 @@ interface AlgorithmLibraryProps {
   workflows: Workflow[];
   setAlgorithms: (algorithms: Algorithm[]) => void;
   setWorkflows: (workflows: Workflow[]) => void;
-  onEditAlgorithm: () => void;
+  onEditAlgorithm: (algorithm?: Algorithm) => void;
 }
 
 const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
@@ -36,10 +36,10 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
       lastModified: new Date(),
     };
     
-    database.saveAlgorithm(newAlgorithm).then(() => {
-      database.getAlgorithms().then(setAlgorithms);
+    mongoDatabase.saveAlgorithm(newAlgorithm).then(() => {
+      mongoDatabase.getAlgorithms().then(setAlgorithms);
       setShowAlgorithmModal(false);
-      onEditAlgorithm();
+      onEditAlgorithm(newAlgorithm);
     }).catch(error => {
       console.error('Error creating algorithm:', error);
       alert('Error creating algorithm');
@@ -54,8 +54,8 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
       created: new Date(),
     };
     
-    database.saveWorkflow(newWorkflow).then(() => {
-      database.getWorkflows().then(setWorkflows);
+    mongoDatabase.saveWorkflow(newWorkflow).then(() => {
+      mongoDatabase.getWorkflows().then(setWorkflows);
       setShowWorkflowModal(false);
     }).catch(error => {
       console.error('Error creating workflow:', error);
@@ -82,7 +82,7 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
           {algorithms.map((algorithm) => (
             <div
               key={algorithm.id}
-              onClick={onEditAlgorithm}
+              onClick={() => onEditAlgorithm(algorithm)}
               className="bg-white rounded-xl p-6 border-2 border-gray-200 hover:border-indigo-400 hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-pointer"
             >
               <h3 className="text-lg font-semibold text-gray-800 mb-2">{algorithm.name}</h3>

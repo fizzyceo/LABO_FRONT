@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Save, RotateCcw, Settings, Globe } from "lucide-react";
 import { Algorithm, Parameter } from "../types";
 import {
@@ -6,19 +6,24 @@ import {
   algorithmTemplates,
 } from "../data/parameterDefinitions";
 import { globalParameters } from "../data/globalParameters";
-import { database } from "../services/database";
+import { mongoDatabase } from "../services/mongoDatabase";
 import ParameterConfigForm from "./ParameterConfigForm";
 import GlobalParametersForm from "./GlobalParametersForm";
 
 interface AlgorithmBuilderProps {
   algorithms: Algorithm[];
   setAlgorithms: (algorithms: Algorithm[]) => void;
+  editingAlgorithm?: Algorithm | null;
+  onAlgorithmSaved?: () => void;
 }
 
 const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   algorithms,
   setAlgorithms,
+  editingAlgorithm,
+  onAlgorithmSaved,
 }) => {
+  const [currentAlgorithmId, setCurrentAlgorithmId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState<Parameter[]>([
@@ -31,6 +36,18 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   const [globalParameterValues, setGlobalParameterValues] = useState(
     globalParameters.map((p) => ({ name: p.name, value: p.defaultValue }))
   );
+
+  // Load algorithm data when editing
+  useEffect(() => {
+    if (editingAlgorithm) {
+      setCurrentAlgorithmId(editingAlgorithm.id);
+      setName(editingAlgorithm.name);
+      setDescription(editingAlgorithm.description);
+      setParameters(editingAlgorithm.parameters);
+      setAction(editingAlgorithm.action);
+      setGlobalParameterValues(editingAlgorithm.globalParameters);
+    }
+  }, [editingAlgorithm]);
 
   const globalParametersList = parameterDefinitions.filter((p) => p.isGlobal);
   const specificParameters = parameterDefinitions.filter((p) => !p.isGlobal);
@@ -61,6 +78,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   };
 
   const clearBuilder = () => {
+    setCurrentAlgorithmId(null);
     setName("");
     setDescription("");
     setParameters([{ name: "", label: "", subParameters: [{ param: "", config: { type: "exact", required: false } }] }]);
@@ -82,22 +100,25 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
     );
 
     const newAlgorithm: Algorithm = {
-      id: Date.now(),
+      id: currentAlgorithmId || Date.now(),
       name,
       description,
       parameters: validParameters,
       action,
       globalParameters: globalParameterValues,
-      created: new Date(),
+      created: editingAlgorithm?.created || new Date(),
       lastModified: new Date(),
     };
 
-    database
+    mongoDatabase
       .saveAlgorithm(newAlgorithm)
       .then(() => {
-        database.getAlgorithms().then(setAlgorithms);
+        mongoDatabase.getAlgorithms().then(setAlgorithms);
         clearBuilder();
-        alert("Algorithm saved successfully!");
+        alert(currentAlgorithmId ? "Algorithm updated successfully!" : "Algorithm saved successfully!");
+        if (onAlgorithmSaved) {
+          onAlgorithmSaved();
+        }
       })
       .catch((error) => {
         console.error("Error saving algorithm:", error);
@@ -109,7 +130,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
     <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          Algorithm Builder
+          {currentAlgorithmId ? 'Edit Algorithm' : 'Algorithm Builder'}
         </h2>
         <div className="flex gap-3">
           <button

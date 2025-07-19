@@ -43,18 +43,28 @@ const GlobalParametersForm: React.FC<GlobalParametersFormProps> = ({ values, onC
             </label>
             
             {param.type === 'range' ? (
-              <div className="flex items-center gap-2">
+              <div className="space-y-2">
                 <input
                   type="number"
                   value={getValue(param.name)}
                   onChange={(e) => updateValue(param.name, parseInt(e.target.value) || param.defaultValue)}
                   min={param.min}
                   max={param.max}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-indigo-500 focus:outline-none"
                 />
-                {param.unit && (
-                  <span className="text-sm text-gray-500">{param.unit}</span>
-                )}
+                <input
+                  type="range"
+                  value={getValue(param.name)}
+                  onChange={(e) => updateValue(param.name, parseInt(e.target.value) || param.defaultValue)}
+                  min={param.min}
+                  max={param.max}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>{param.min}{param.unit && ` ${param.unit}`}</span>
+                  <span className="font-medium">{getValue(param.name)}{param.unit && ` ${param.unit}`}</span>
+                  <span>{param.max}{param.unit && ` ${param.unit}`}</span>
+                </div>
               </div>
             ) : param.type === 'list' ? (
               <select
