@@ -22,7 +22,7 @@ export interface SubParameter {
 }
 
 export interface ParameterConfig {
-  type: "range" | "exact" | "contains" | "boolean" | "list";
+  type: "range" | "exact" | "contains" | "boolean" | "list" | "date";
   min?: number;
   max?: number;
   value?: string | number | boolean;

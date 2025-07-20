@@ -1,448 +1,344 @@
-import { ParameterDefinition } from '../types';
+import { ParameterDefinition } from "../types";
 
 export const parameterDefinitions: ParameterDefinition[] = [
   // Global Parameters (apply to all algorithms)
   {
-    name: 'patient_age',
-    label: 'Patient Age',
-    type: 'range',
+    name: "patient_age",
+    label: "Patient Age",
+    type: "range",
     defaultConfig: {
-      type: 'range',
+      type: "range",
       min: 0,
       max: 120,
-      unit: 'years',
-      required: true
+      unit: "years",
+      required: true,
     },
     isGlobal: true,
-    category: 'Patient Info'
+    category: "Patient Info",
   },
   {
-    name: 'patient_gender',
-    label: 'Patient Gender',
-    type: 'list',
+    name: "patient_gender",
+    label: "Patient Gender",
+    type: "list",
     defaultConfig: {
-      type: 'list',
-      options: ['Male', 'Female', 'Other'],
-      required: true
+      type: "list",
+      options: ["Male", "Female", "Other"],
+      required: true,
     },
     isGlobal: true,
-    category: 'Patient Info'
-  },
-  {
-    name: 'collection_time',
-    label: 'Collection Time',
-    type: 'exact',
-    defaultConfig: {
-      type: 'exact',
-      required: false
-    },
-    isGlobal: true,
-    category: 'Sample Info'
-  },
-  {
-    name: 'processing_time',
-    label: 'Processing Time',
-    type: 'exact',
-    defaultConfig: {
-      type: 'exact',
-      required: false
-    },
-    isGlobal: true,
-    category: 'Sample Info'
+    category: "Patient Info",
   },
 
   // Blood Analysis Parameters
   {
-    name: 'result',
-    label: 'Test Result',
-    type: 'range',
+    name: "result",
+    label: "Test Result",
+    type: "range",
     defaultConfig: {
-      type: 'range',
+      type: "range",
       min: 0,
       max: 100,
-      required: true
+      required: true,
     },
     isGlobal: false,
-    category: 'Results'
+    category: "Results",
   },
   {
-    name: 'qc',
-    label: 'Quality Control',
-    type: 'contains',
+    name: "qc",
+    label: "Quality Control",
+    type: "contains",
     defaultConfig: {
-      type: 'contains',
-      value: 'normal',
-      required: true
+      type: "contains",
+      value: "normal",
+      required: true,
     },
     isGlobal: false,
-    category: 'Quality'
+    category: "Quality",
   },
   {
-    name: 'unity',
-    label: 'Unit of Measurement',
-    type: 'list',
+    name: "unity",
+    label: "Unit of Measurement",
+    type: "list",
     defaultConfig: {
-      type: 'list',
-      options: ['g/L', 'mg/dL', 'mmol/L', 'µmol/L', 'IU/L'],
-      required: true
+      type: "list",
+      options: ["g/L", "mg/dL", "mmol/L", "µmol/L", "IU/L"],
+      required: true,
     },
     isGlobal: false,
-    category: 'Results'
+    category: "Results",
+  },
+
+  {
+    name: "entecedent_date",
+    label: "Last Medical History Date",
+    type: "range",
+    defaultConfig: {
+      type: "date",
+      required: false,
+    },
+    isGlobal: false,
+    category: "Medical History",
   },
   {
-    name: 'reference_range',
-    label: 'Reference Range',
-    type: 'exact',
+    name: "entecedent_result",
+    label: "Last Medical History Result",
+    type: "range",
     defaultConfig: {
-      type: 'exact',
-      required: false
+      type: "range",
+      min: 0,
+      max: 100,
+      required: false,
     },
     isGlobal: false,
-    category: 'Results'
+    category: "Medical History",
   },
+
   {
-    name: 'sample_type',
-    label: 'Sample Type',
-    type: 'list',
+    name: "comments",
+    label: "Comments",
+    type: "contains",
     defaultConfig: {
-      type: 'list',
-      options: ['blood', 'serum', 'plasma', 'urine', 'saliva'],
-      required: true
+      type: "contains",
+      required: false,
     },
     isGlobal: false,
-    category: 'Sample Info'
+    category: "Notes",
   },
-  {
-    name: 'technician',
-    label: 'Technician ID',
-    type: 'exact',
-    defaultConfig: {
-      type: 'exact',
-      required: false
-    },
-    isGlobal: false,
-    category: 'Lab Info'
-  },
-  {
-    name: 'instrument',
-    label: 'Instrument',
-    type: 'exact',
-    defaultConfig: {
-      type: 'exact',
-      required: false
-    },
-    isGlobal: false,
-    category: 'Lab Info'
-  },
-  {
-    name: 'dilution_factor',
-    label: 'Dilution Factor',
-    type: 'range',
-    defaultConfig: {
-      type: 'range',
-      min: 1,
-      max: 1000,
-      required: false
-    },
-    isGlobal: false,
-    category: 'Lab Info'
-  },
-  {
-    name: 'reagent_lot',
-    label: 'Reagent Lot',
-    type: 'exact',
-    defaultConfig: {
-      type: 'exact',
-      required: false
-    },
-    isGlobal: false,
-    category: 'Lab Info'
-  },
-  {
-    name: 'calibration_date',
-    label: 'Calibration Date',
-    type: 'exact',
-    defaultConfig: {
-      type: 'exact',
-      required: false
-    },
-    isGlobal: false,
-    category: 'Lab Info'
-  },
-  {
-    name: 'temperature',
-    label: 'Temperature',
-    type: 'range',
-    defaultConfig: {
-      type: 'range',
-      min: 15,
-      max: 30,
-      unit: '°C',
-      required: false
-    },
-    isGlobal: false,
-    category: 'Environment'
-  },
-  {
-    name: 'humidity',
-    label: 'Humidity',
-    type: 'range',
-    defaultConfig: {
-      type: 'range',
-      min: 30,
-      max: 70,
-      unit: '%',
-      required: false
-    },
-    isGlobal: false,
-    category: 'Environment'
-  },
-  {
-    name: 'comments',
-    label: 'Comments',
-    type: 'contains',
-    defaultConfig: {
-      type: 'contains',
-      required: false
-    },
-    isGlobal: false,
-    category: 'Notes'
-  }
 ];
 
 export const algorithmTemplates = {
   blood: {
-    name: 'Blood Analysis (FNS)',
+    name: "Blood Analysis (FNS)",
     defaultParameters: [
       {
-        name: 'globule_rouge',
-        label: 'Globule Rouge',
+        name: "globule_rouge",
+        label: "Globule Rouge",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 5,
               max: 15,
-              unit: 'M/µL',
-              required: true
-            }
+              unit: "M/µL",
+              required: true,
+            },
           },
           {
-            param: 'result_type',
+            param: "result_type",
             config: {
-              type: 'list' as const,
-              options: ['normal', 'supra', 'infra'],
-              required: true
-            }
+              type: "list" as const,
+              options: ["normal", "supra", "infra"],
+              required: true,
+            },
           },
           {
-            param: 'qc',
+            param: "qc",
             config: {
-              type: 'contains' as const,
-              value: 'abnormal',
-              required: true
-            }
-          }
-        ]
+              type: "contains" as const,
+              value: "abnormal",
+              required: true,
+            },
+          },
+        ],
       },
       {
-        name: 'hemoglobine',
-        label: 'Hémoglobine',
+        name: "hemoglobine",
+        label: "Hémoglobine",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 12,
               max: 16,
-              unit: 'g/dL',
-              required: true
-            }
+              unit: "g/dL",
+              required: true,
+            },
           },
           {
-            param: 'qc',
+            param: "qc",
             config: {
-              type: 'contains' as const,
-              value: 'normal',
-              required: true
-            }
-          }
-        ]
+              type: "contains" as const,
+              value: "normal",
+              required: true,
+            },
+          },
+        ],
       },
       {
-        name: 'plaquettes',
-        label: 'Plaquettes',
+        name: "plaquettes",
+        label: "Plaquettes",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 150,
               max: 450,
-              unit: 'K/µL',
-              required: true
-            }
-          }
-        ]
-      }
-    ]
+              unit: "K/µL",
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
   },
   urine: {
-    name: 'Urine Analysis',
+    name: "Urine Analysis",
     defaultParameters: [
       {
-        name: 'proteine',
-        label: 'Protéine',
+        name: "proteine",
+        label: "Protéine",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 0,
               max: 0.15,
-              unit: 'g/L',
-              required: true
-            }
+              unit: "g/L",
+              required: true,
+            },
           },
           {
-            param: 'sample_type',
+            param: "sample_type",
             config: {
-              type: 'list' as const,
-              options: ['urine'],
-              required: true
-            }
-          }
-        ]
+              type: "list" as const,
+              options: ["urine"],
+              required: true,
+            },
+          },
+        ],
       },
       {
-        name: 'glucose',
-        label: 'Glucose',
+        name: "glucose",
+        label: "Glucose",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'exact' as const,
-              value: '0',
-              required: true
-            }
+              type: "exact" as const,
+              value: "0",
+              required: true,
+            },
           },
           {
-            param: 'qc',
+            param: "qc",
             config: {
-              type: 'contains' as const,
-              value: 'normal',
-              required: true
-            }
-          }
-        ]
-      }
-    ]
+              type: "contains" as const,
+              value: "normal",
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
   },
   biochemistry: {
-    name: 'Biochemistry Analysis',
+    name: "Biochemistry Analysis",
     defaultParameters: [
       {
-        name: 'cholesterol',
-        label: 'Cholestérol Total',
+        name: "cholesterol",
+        label: "Cholestérol Total",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 0,
               max: 2.0,
-              unit: 'g/L',
-              required: true
-            }
+              unit: "g/L",
+              required: true,
+            },
           },
           {
-            param: 'result_type',
+            param: "result_type",
             config: {
-              type: 'list' as const,
-              options: ['normal', 'elevated', 'low'],
-              required: true
-            }
-          }
-        ]
+              type: "list" as const,
+              options: ["normal", "elevated", "low"],
+              required: true,
+            },
+          },
+        ],
       },
       {
-        name: 'glucose_sanguin',
-        label: 'Glucose Sanguin',
+        name: "glucose_sanguin",
+        label: "Glucose Sanguin",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 0.7,
               max: 1.1,
-              unit: 'g/L',
-              required: true
-            }
+              unit: "g/L",
+              required: true,
+            },
           },
           {
-            param: 'unity',
+            param: "unity",
             config: {
-              type: 'list' as const,
-              options: ['g/L', 'mg/dL', 'mmol/L'],
-              required: true
-            }
-          }
-        ]
-      }
-    ]
+              type: "list" as const,
+              options: ["g/L", "mg/dL", "mmol/L"],
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
   },
   hematology: {
-    name: 'Hematology Analysis',
+    name: "Hematology Analysis",
     defaultParameters: [
       {
-        name: 'leucocytes',
-        label: 'Leucocytes',
+        name: "leucocytes",
+        label: "Leucocytes",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 4,
               max: 10,
-              unit: '10^9/L',
-              required: true
-            }
+              unit: "10^9/L",
+              required: true,
+            },
           },
           {
-            param: 'sample_type',
+            param: "sample_type",
             config: {
-              type: 'list' as const,
-              options: ['blood', 'plasma'],
-              required: true
-            }
-          }
-        ]
+              type: "list" as const,
+              options: ["blood", "plasma"],
+              required: true,
+            },
+          },
+        ],
       },
       {
-        name: 'neutrophiles',
-        label: 'Neutrophiles',
+        name: "neutrophiles",
+        label: "Neutrophiles",
         subParameters: [
           {
-            param: 'result',
+            param: "result",
             config: {
-              type: 'range' as const,
+              type: "range" as const,
               min: 50,
               max: 70,
-              unit: '%',
-              required: true
-            }
+              unit: "%",
+              required: true,
+            },
           },
           {
-            param: 'qc',
+            param: "qc",
             config: {
-              type: 'contains' as const,
-              value: 'normal',
-              required: true
-            }
-          }
-        ]
-      }
-    ]
-  }
+              type: "contains" as const,
+              value: "normal",
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
+  },
 };
