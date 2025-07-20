@@ -5,12 +5,14 @@ interface ParameterConfigFormProps {
   config: ParameterConfig;
   onChange: (config: ParameterConfig) => void;
   parameterType: string;
+  availableParameters?: string[];
 }
 
 const ParameterConfigForm: React.FC<ParameterConfigFormProps> = ({
   config,
   onChange,
-  parameterType
+  parameterType,
+  availableParameters = []
 }) => {
   const updateConfig = (updates: Partial<ParameterConfig>) => {
     onChange({ ...config, ...updates });
@@ -62,18 +64,57 @@ const ParameterConfigForm: React.FC<ParameterConfigFormProps> = ({
 
       case 'exact':
         return (
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Expected Value
-            </label>
-            <input
-              type="text"
-              value={config.value || ''}
-              onChange={(e) => updateConfig({ value: e.target.value })}
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:outline-none"
-              placeholder="Enter exact value"
-            />
-          </div>
+          <>
+            {parameterType === 'entecedent_date' ? (
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Minimum Days (greater than)
+                </label>
+                <input
+                  type="number"
+                  value={config.value || ''}
+                  onChange={(e) => updateConfig({ value: e.target.value })}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:outline-none"
+                  placeholder="e.g., 7"
+                  min="0"
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  Test must be more than this many days since previous test
+                </div>
+              </div>
+            ) : parameterType === 'interparameter' ? (
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Select Linked Parameter
+                </label>
+                <select
+                  value={config.value || ''}
+                  onChange={(e) => updateConfig({ value: e.target.value })}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:outline-none"
+                >
+                  <option value="">Select parameter...</option>
+                  {availableParameters.map((param) => (
+                    <option key={param} value={param}>
+                      {param}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Expected Value
+                </label>
+                <input
+                  type="text"
+                  value={config.value || ''}
+                  onChange={(e) => updateConfig({ value: e.target.value })}
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:outline-none"
+                  placeholder="Enter exact value"
+                />
+              </div>
+            )}
+          </>
         );
 
       case 'contains':

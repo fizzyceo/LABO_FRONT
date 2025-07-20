@@ -293,8 +293,8 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
                                     .filter(p => p.name && p.name !== parameter.name)
                                     .map(p => p.name);
                                   newConfig = {
-                                    type: 'list',
-                                    options: availableParams,
+                                    type: 'exact',
+                                    value: availableParams[0] || '',
                                     required: false
                                   };
                                 }
@@ -334,6 +334,10 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
                                   setParameters(updated);
                                 }}
                                 parameterType={subParam.param}
+                                availableParameters={parameters
+                                  .filter(p => p.name && p.name !== parameter.name)
+                                  .map(p => p.name)
+                                }
                               />
                             )}
                           </div>

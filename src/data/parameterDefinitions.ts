@@ -82,13 +82,11 @@ export const parameterDefinitions: ParameterDefinition[] = [
   },
   {
     name: "entecedent_date",
-    label: "Days Since Previous Test",
-    type: "range",
+    label: "Days Since Previous Test (> X days)",
+    type: "exact",
     defaultConfig: {
-      type: "range",
-      min: 0,
-      max: 365,
-      unit: "days",
+      type: "exact",
+      value: "7",
       required: false,
     },
     isGlobal: false,
@@ -97,10 +95,10 @@ export const parameterDefinitions: ParameterDefinition[] = [
   {
     name: "interparameter",
     label: "Linked Parameter",
-    type: "list",
+    type: "exact",
     defaultConfig: {
-      type: "list",
-      options: [],
+      type: "exact",
+      value: "",
       required: false,
     },
     isGlobal: false,
