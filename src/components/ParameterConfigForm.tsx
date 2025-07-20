@@ -98,13 +98,14 @@ const ParameterConfigForm: React.FC<ParameterConfigFormProps> = ({
             <label className="block text-xs font-medium text-gray-600 mb-1">
               Allowed Values (comma-separated)
             </label>
-            <input
+            <textarea
               type="text"
               value={config.options?.join(', ') || ''}
               onChange={(e) => updateConfig({ 
                 options: e.target.value.split(',').map(s => s.trim()).filter(s => s) 
               })}
-              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:outline-none"
+              rows={2}
+              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:outline-none resize-none"
               placeholder="option1, option2, option3"
             />
           </div>

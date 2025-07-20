@@ -283,10 +283,27 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
                             <select
                               value={subParam.param}
                               onChange={(e) => {
+                                // Update the parameter and reset config if parameter type changes
+                                const paramDef = specificParameters.find(p => p.name === e.target.value);
+                                let newConfig = subParam.config;
+                                
+                                // For interparameter, populate options with available parameters
+                                if (e.target.value === 'interparameter') {
+                                  const availableParams = parameters
+                                    .filter(p => p.name && p.name !== parameter.name)
+                                    .map(p => p.name);
+                                  newConfig = {
+                                    type: 'list',
+                                    options: availableParams,
+                                    required: false
+                                  };
+                                }
+                                
                                 const updated = [...parameters];
                                 updated[index].subParameters[subIndex] = {
                                   ...updated[index].subParameters[subIndex],
                                   param: e.target.value,
+                                  config: newConfig
                                 };
                                 setParameters(updated);
                               }}

@@ -61,7 +61,7 @@ export interface ExecutionLog {
 export interface GlobalParameter {
   name: string;
   label: string;
-  type: "range" | "list";
+  type: "range" | "list" | "text";
   defaultValue: any;
   options?: string[];
   min?: number;

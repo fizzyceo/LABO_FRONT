@@ -16,5 +16,11 @@ export const globalParameters: GlobalParameter[] = [
     type: 'list',
     defaultValue: 'M',
     options: ['M', 'F']
+  },
+  {
+    name: 'questionnaire',
+    label: 'Questionnaire',
+    type: 'text',
+    defaultValue: ''
   }
 ];

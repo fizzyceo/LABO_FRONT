@@ -144,6 +144,14 @@ const GlobalParametersForm: React.FC<GlobalParametersFormProps> = ({
                   </option>
                 ))}
               </select>
+            ) : param.type === "text" ? (
+              <input
+                type="text"
+                value={getValue(param.name)}
+                onChange={(e) => updateValue(param.name, e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-indigo-500 focus:outline-none"
+                placeholder="Enter text..."
+              />
             ) : (
               <input
                 type="text"

@@ -69,28 +69,42 @@ export const parameterDefinitions: ParameterDefinition[] = [
   },
 
   {
-    name: "entecedent_date",
-    label: "Last Medical History Date",
-    type: "range",
+    name: "entecedent",
+    label: "Previous Value",
+    type: "list",
     defaultConfig: {
-      type: "date",
+      type: "list",
+      options: ["LOW", "HIGH"],
       required: false,
     },
     isGlobal: false,
     category: "Medical History",
   },
   {
-    name: "entecedent_result",
-    label: "Last Medical History Result",
+    name: "entecedent_date",
+    label: "Days Since Previous Test",
     type: "range",
     defaultConfig: {
       type: "range",
       min: 0,
-      max: 100,
+      max: 365,
+      unit: "days",
       required: false,
     },
     isGlobal: false,
     category: "Medical History",
+  },
+  {
+    name: "interparameter",
+    label: "Linked Parameter",
+    type: "list",
+    defaultConfig: {
+      type: "list",
+      options: [],
+      required: false,
+    },
+    isGlobal: false,
+    category: "Relationships",
   },
 
   {
