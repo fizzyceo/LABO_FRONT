@@ -24,6 +24,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   onAlgorithmSaved,
 }) => {
   const [currentAlgorithmId, setCurrentAlgorithmId] = useState<number | null>(null);
+  const [currentAlgorithmId, setCurrentAlgorithmId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [parameters, setParameters] = useState<Parameter[]>([
@@ -40,23 +41,19 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   // Load algorithm data when editing
   useEffect(() => {
     if (editingAlgorithm) {
-      setCurrentAlgorithmId(editingAlgorithm.id || null);
+      setCurrentAlgorithmId(typeof editingAlgorithm.id === 'string' ? editingAlgorithm.id : null);
       setName(editingAlgorithm.name);
       setDescription(editingAlgorithm.description);
-      setParameters(editingAlgorithm.parameters || []);
+      setParameters(editingAlgorithm.parameters && editingAlgorithm.parameters.length > 0 
+        ? editingAlgorithm.parameters 
+        : [{ name: "", label: "", subParameters: [{ param: "", config: { type: "exact", required: false } }] }]);
       setAction(editingAlgorithm.action);
-      setGlobalParameterValues(editingAlgorithm.globalParameters || []);
+      setGlobalParameterValues(editingAlgorithm.globalParameters && editingAlgorithm.globalParameters.length > 0
+        ? editingAlgorithm.globalParameters
+        : globalParameters.map((p) => ({ name: p.name, value: p.defaultValue })));
     } else {
       // Clear form when not editing
-      setCurrentAlgorithmId(null);
-      setName("");
-      setDescription("");
-      setParameters([{ name: "", label: "", subParameters: [{ param: "", config: { type: "exact", required: false } }] }]);
-      setAction("validate");
-      setSelectedTemplate("");
-      setGlobalParameterValues(
-        globalParameters.map((p) => ({ name: p.name, value: p.defaultValue }))
-      );
+      clearBuilder();
     }
   }, [editingAlgorithm]);
 
@@ -106,9 +103,11 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       return;
     }
 
-    const validParameters = parameters.filter(
-      (p) => p.name && p.subParameters.length > 0
-    );
+    // Filter out empty parameters but keep structure
+    const validParameters = parameters.filter(p => p.name.trim() !== '').map(p => ({
+      ...p,
+      subParameters: p.subParameters.filter(sp => sp.param.trim() !== '')
+    }));
 
     const algorithmToSave: Algorithm = {
       name,
@@ -120,11 +119,13 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       lastModified: new Date(),
     };
     
-    // Only include ID if we're editing an existing algorithm and it's not 0
-    if (currentAlgorithmId && currentAlgorithmId !== 0) {
+    // Only include ID if we're editing an existing algorithm
+    if (currentAlgorithmId && currentAlgorithmId !== 0 && typeof currentAlgorithmId === 'string') {
       algorithmToSave.id = currentAlgorithmId;
       algorithmToSave.created = editingAlgorithm?.created || new Date();
     }
+
+    console.log('Saving algorithm:', algorithmToSave);
 
     database
       .saveAlgorithm(algorithmToSave)

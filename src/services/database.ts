@@ -68,8 +68,9 @@ class DatabaseService {
     try {
       let response: Response;
       
-      if (algorithm.id !== undefined && algorithm.id !== null && algorithm.id !== 0) {
+      if (algorithm.id && typeof algorithm.id === 'string' && algorithm.id.length === 24) {
         // Update existing algorithm
+        console.log('Updating algorithm with ID:', algorithm.id);
         response = await fetch(`${this.baseUrl}/algorithms/${algorithm.id}`, {
           method: 'PUT',
           headers: {
@@ -82,6 +83,7 @@ class DatabaseService {
         });
       } else {
         // Create new algorithm
+        console.log('Creating new algorithm');
         const { id, ...newAlgorithm } = algorithm;
         newAlgorithm.created = new Date();
         newAlgorithm.lastModified = new Date();
@@ -95,7 +97,14 @@ class DatabaseService {
         });
       }
       
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
+      }
+      
       const savedAlgorithm = await this.handleResponse<Algorithm>(response);
+      console.log('Saved algorithm:', savedAlgorithm);
       
       return {
         ...savedAlgorithm,
