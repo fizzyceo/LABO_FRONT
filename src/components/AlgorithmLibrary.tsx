@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Calendar, Settings, Trash2, Copy } from 'lucide-react';
 import { Algorithm, Workflow } from '../types';
 import { database } from '../services/database';
+import { useToast } from '../hooks/useToast';
 import Modal from './Modal';
 import AlgorithmForm from './AlgorithmForm';
 import WorkflowForm from './WorkflowForm';
@@ -12,6 +13,7 @@ interface AlgorithmLibraryProps {
   setAlgorithms: (algorithms: Algorithm[]) => void;
   setWorkflows: (workflows: Workflow[]) => void;
   onEditAlgorithm: (algorithm?: Algorithm) => void;
+  toast: ReturnType<typeof useToast>;
 }
 
 const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
@@ -20,6 +22,7 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
   setAlgorithms,
   setWorkflows,
   onEditAlgorithm,
+  toast,
 }) => {
   const [showAlgorithmModal, setShowAlgorithmModal] = useState(false);
   const [showWorkflowModal, setShowWorkflowModal] = useState(false);
@@ -39,9 +42,10 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
       database.getAlgorithms().then(setAlgorithms);
       setShowAlgorithmModal(false);
       onEditAlgorithm(newAlgorithm);
+      toast.showSuccess('Algorithm Created', 'New algorithm has been created successfully');
     }).catch(error => {
       console.error('Error creating algorithm:', error);
-      alert('Error creating algorithm');
+      toast.showError('Creation Failed', 'Failed to create algorithm. Please try again.');
     });
   };
 
@@ -56,23 +60,25 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
     database.saveWorkflow(newWorkflow).then(() => {
       database.getWorkflows().then(setWorkflows);
       setShowWorkflowModal(false);
+      toast.showSuccess('Workflow Created', 'New workflow has been created successfully');
     }).catch(error => {
       console.error('Error creating workflow:', error);
-      alert('Error creating workflow');
+      toast.showError('Creation Failed', 'Failed to create workflow. Please try again.');
     });
   };
 
   const handleDeleteAlgorithm = async (algorithm: Algorithm, event: React.MouseEvent) => {
     event.stopPropagation();
     
-    if (confirm(`Are you sure you want to delete "${algorithm.name}"?`)) {
+    if (window.confirm(`Are you sure you want to delete "${algorithm.name}"?`)) {
       try {
         await database.deleteAlgorithm(algorithm.id);
         const updatedAlgorithms = await database.getAlgorithms();
         setAlgorithms(updatedAlgorithms);
+        toast.showSuccess('Algorithm Deleted', `"${algorithm.name}" has been deleted successfully`);
       } catch (error) {
         console.error('Error deleting algorithm:', error);
-        alert('Error deleting algorithm');
+        toast.showError('Deletion Failed', 'Failed to delete algorithm. Please try again.');
       }
     }
   };
@@ -80,14 +86,15 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
   const handleDeleteWorkflow = async (workflow: Workflow, event: React.MouseEvent) => {
     event.stopPropagation();
     
-    if (confirm(`Are you sure you want to delete "${workflow.name}"?`)) {
+    if (window.confirm(`Are you sure you want to delete "${workflow.name}"?`)) {
       try {
         await database.deleteWorkflow(workflow.id);
         const updatedWorkflows = await database.getWorkflows();
         setWorkflows(updatedWorkflows);
+        toast.showSuccess('Workflow Deleted', `"${workflow.name}" has been deleted successfully`);
       } catch (error) {
         console.error('Error deleting workflow:', error);
-        alert('Error deleting workflow');
+        toast.showError('Deletion Failed', 'Failed to delete workflow. Please try again.');
       }
     }
   };
@@ -107,9 +114,10 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
        await database.saveAlgorithm(duplicatedAlgorithm);
        const updatedAlgorithms = await database.getAlgorithms();
        setAlgorithms(updatedAlgorithms);
+      toast.showSuccess('Algorithm Duplicated', `"${duplicatedAlgorithm.name}" has been created successfully`);
      } catch (error) {
        console.error('Error duplicating algorithm:', error);
-       alert('Error duplicating algorithm');
+      toast.showError('Duplication Failed', 'Failed to duplicate algorithm. Please try again.');
      }
    };
   return (

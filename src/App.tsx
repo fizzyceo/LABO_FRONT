@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { useToast } from "./hooks/useToast";
+import ToastContainer from "./components/ToastContainer";
 import Header from "./components/Header";
 import AlgorithmLibrary from "./components/AlgorithmLibrary";
 import AlgorithmBuilder from "./components/AlgorithmBuilder";
@@ -15,6 +17,7 @@ function App() {
   const [editingAlgorithm, setEditingAlgorithm] = useState<Algorithm | null>(
     null
   );
+  const toast = useToast();
 
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
@@ -54,6 +57,7 @@ function App() {
             setAlgorithms={setAlgorithms}
             setWorkflows={setWorkflows}
             onEditAlgorithm={handleEditAlgorithm}
+            toast={toast}
           />
         );
       case "builder":
@@ -63,6 +67,7 @@ function App() {
             setAlgorithms={setAlgorithms}
             editingAlgorithm={editingAlgorithm}
             onAlgorithmSaved={handleAlgorithmSaved}
+            toast={toast}
           />
         );
       case "scraper":
@@ -86,6 +91,8 @@ function App() {
         onQuickBuilder={() => setActiveTab("builder")}
         onQuickRun={() => setActiveTab("execution")}
       />
+      
+      <ToastContainer toasts={toast.toasts} onRemoveToast={toast.removeToast} />
     </div>
   );
 }

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { algorithmTemplates } from '../data/parameterDefinitions';
+import { useToast } from '../hooks/useToast';
 
 interface AlgorithmFormProps {
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  toast?: ReturnType<typeof useToast>;
 }
 
-const AlgorithmForm: React.FC<AlgorithmFormProps> = ({ onSubmit, onCancel }) => {
+const AlgorithmForm: React.FC<AlgorithmFormProps> = ({ onSubmit, onCancel, toast }) => {
   const [name, setName] = useState('');
   const [template, setTemplate] = useState('blank');
   const [description, setDescription] = useState('');
@@ -14,7 +16,9 @@ const AlgorithmForm: React.FC<AlgorithmFormProps> = ({ onSubmit, onCancel }) => 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert('Please enter an algorithm name');
+      if (toast) {
+        toast.showWarning('Missing Information', 'Please enter an algorithm name');
+      }
       return;
     }
     onSubmit({ name, template, description });

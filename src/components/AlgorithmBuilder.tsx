@@ -7,6 +7,7 @@ import {
 } from "../data/parameterDefinitions";
 import { globalParameters } from "../data/globalParameters";
 import { database } from "../services/database";
+import { useToast } from "../hooks/useToast";
 import ParameterConfigForm from "./ParameterConfigForm";
 import GlobalParametersForm from "./GlobalParametersForm";
 
@@ -15,6 +16,7 @@ interface AlgorithmBuilderProps {
   setAlgorithms: (algorithms: Algorithm[]) => void;
   editingAlgorithm?: Algorithm | null;
   onAlgorithmSaved?: () => void;
+  toast: ReturnType<typeof useToast>;
 }
 
 const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
@@ -22,6 +24,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   setAlgorithms,
   editingAlgorithm,
   onAlgorithmSaved,
+  toast,
 }) => {
   const [currentAlgorithmId, setCurrentAlgorithmId] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -98,7 +101,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
 
   const saveAlgorithm = () => {
     if (!name.trim()) {
-      alert("Please enter an algorithm name");
+      toast.showWarning('Missing Information', 'Please enter an algorithm name');
       return;
     }
 
@@ -134,14 +137,17 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       .then(setAlgorithms)
       .then(() => {
         clearBuilder();
-        alert(currentAlgorithmId ? "Algorithm updated successfully!" : "Algorithm created successfully!");
+        toast.showSuccess(
+          currentAlgorithmId ? 'Algorithm Updated' : 'Algorithm Created',
+          currentAlgorithmId ? 'Algorithm has been updated successfully!' : 'Algorithm has been created successfully!'
+        );
         if (onAlgorithmSaved) {
           onAlgorithmSaved();
         }
       })
       .catch((error) => {
         console.error("Error saving algorithm:", error);
-        alert(`Error saving algorithm: ${error.message}`);
+        toast.showError('Save Failed', `Failed to save algorithm: ${error.message}`);
       });
   };
 
