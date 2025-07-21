@@ -132,7 +132,7 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
               <div onClick={() => onEditAlgorithm(algorithm)}>
               <p className="text-gray-600 text-sm mb-4">{algorithm.description}</p>
               <div className="flex justify-between items-center text-xs text-gray-500">
-                <span>{algorithm.parameters.reduce((total, param) => total + param.subParameters.length, 0)} sub-parameters</span>
+                <span>{algorithm.parameters?.reduce((total, param) => total + (param.subParameters?.length || 0), 0) || 0} sub-parameters</span>
                 <span className="capitalize">Action: {algorithm.action}</span>
               </div>
               </div>

@@ -40,10 +40,10 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   // Load algorithm data when editing
   useEffect(() => {
     if (editingAlgorithm) {
-      setCurrentAlgorithmId(editingAlgorithm.id);
+      setCurrentAlgorithmId(editingAlgorithm.id || null);
       setName(editingAlgorithm.name);
       setDescription(editingAlgorithm.description);
-      setParameters(editingAlgorithm.parameters);
+      setParameters(editingAlgorithm.parameters || []);
       setAction(editingAlgorithm.action);
       setGlobalParameterValues(editingAlgorithm.globalParameters || []);
     } else {
@@ -111,7 +111,7 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
     );
 
     const newAlgorithm: Algorithm = {
-      id: currentAlgorithmId || 0, // Let server assign ID for new algorithms
+      id: currentAlgorithmId || undefined, // Use undefined for new algorithms
       name,
       description,
       parameters: validParameters,

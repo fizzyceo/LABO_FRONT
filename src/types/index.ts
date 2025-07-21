@@ -1,6 +1,5 @@
 export interface Algorithm {
-  id?: number;
-  _id: string; // MongoDB ObjectId
+  id?: number | string;
   name: string;
   description: string;
   parameters: Parameter[];

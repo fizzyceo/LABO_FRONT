@@ -68,7 +68,7 @@ class DatabaseService {
     try {
       let response: Response;
       
-      if (algorithm.id && algorithm.id > 0) {
+      if (algorithm.id) {
         // Update existing algorithm
         response = await fetch(`${this.baseUrl}/algorithms/${algorithm.id}`, {
           method: 'PUT',
