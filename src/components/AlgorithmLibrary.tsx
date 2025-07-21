@@ -93,26 +93,6 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
     }
   };
 
-   const handleDuplicateAlgorithm = async (algorithm: Algorithm, event: React.MouseEvent) => {
-     event.stopPropagation();
-     
-     const duplicatedAlgorithm: Algorithm = {
-       ...algorithm,
-       id: undefined, // Remove ID so it creates a new one
-       name: `${algorithm.name} (Copy)`,
-       created: new Date(),
-       lastModified: new Date(),
-     };
-     
-     try {
-       await database.saveAlgorithm(duplicatedAlgorithm);
-       const updatedAlgorithms = await database.getAlgorithms();
-       setAlgorithms(updatedAlgorithms);
-     } catch (error) {
-       console.error('Error duplicating algorithm:', error);
-       alert('Error duplicating algorithm');
-     }
-   };
   return (
     <div className="space-y-8">
       {/* Algorithm Library */}
@@ -233,6 +213,10 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
                </div>
           })}
         </div>
+            )
+          }
+          )
+          }
       </div>
 
       {/* Modals */}
