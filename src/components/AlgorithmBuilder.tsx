@@ -45,7 +45,18 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       setDescription(editingAlgorithm.description);
       setParameters(editingAlgorithm.parameters);
       setAction(editingAlgorithm.action);
-      setGlobalParameterValues(editingAlgorithm.globalParameters);
+      setGlobalParameterValues(editingAlgorithm.globalParameters || []);
+    } else {
+      // Clear form when not editing
+      setCurrentAlgorithmId(null);
+      setName("");
+      setDescription("");
+      setParameters([{ name: "", label: "", subParameters: [{ param: "", config: { type: "exact", required: false } }] }]);
+      setAction("validate");
+      setSelectedTemplate("");
+      setGlobalParameterValues(
+        globalParameters.map((p) => ({ name: p.name, value: p.defaultValue }))
+      );
     }
   }, [editingAlgorithm]);
 
