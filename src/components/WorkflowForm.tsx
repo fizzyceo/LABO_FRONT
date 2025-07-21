@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Algorithm } from '../types';
+import { useToast } from '../hooks/useToast';
 
 interface WorkflowFormProps {
   algorithms: Algorithm[];
   onSubmit: (data: any) => void;
   onCancel: () => void;
+  toast?: ReturnType<typeof useToast>;
 }
 
-const WorkflowForm: React.FC<WorkflowFormProps> = ({ algorithms, onSubmit, onCancel }) => {
+const WorkflowForm: React.FC<WorkflowFormProps> = ({ algorithms, onSubmit, onCancel, toast }) => {
   const [name, setName] = useState('');
   const [selectedAlgorithms, setSelectedAlgorithms] = useState<string[]>(['']);
 
@@ -29,7 +31,9 @@ const WorkflowForm: React.FC<WorkflowFormProps> = ({ algorithms, onSubmit, onCan
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert('Please enter a workflow name');
+      if (toast) {
+        toast.showWarning('Missing Information', 'Please enter a workflow name');
+      }
       return;
     }
 
@@ -38,7 +42,9 @@ const WorkflowForm: React.FC<WorkflowFormProps> = ({ algorithms, onSubmit, onCan
       .map(id => parseInt(id));
 
     if (algorithmOrder.length === 0) {
-      alert('Please select at least one algorithm');
+      if (toast) {
+        toast.showWarning('Missing Information', 'Please select at least one algorithm');
+      }
       return;
     }
 
