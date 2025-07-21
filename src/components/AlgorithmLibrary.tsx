@@ -26,7 +26,6 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
 
   const handleCreateAlgorithm = (algorithmData: any) => {
     const newAlgorithm: Algorithm = {
-      id: 0, // Let the server assign the ID
       name: algorithmData.name,
       description: algorithmData.description,
       parameters: [],

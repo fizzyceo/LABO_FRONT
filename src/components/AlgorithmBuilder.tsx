@@ -120,8 +120,8 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       lastModified: new Date(),
     };
     
-    // Only include ID if we're editing an existing algorithm
-    if (currentAlgorithmId) {
+    // Only include ID if we're editing an existing algorithm and it's not 0
+    if (currentAlgorithmId && currentAlgorithmId !== 0) {
       algorithmToSave.id = currentAlgorithmId;
       algorithmToSave.created = editingAlgorithm?.created || new Date();
     }
