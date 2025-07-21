@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, Settings, Trash2 } from 'lucide-react';
+import { Plus, Calendar, Settings, Trash2, Copy } from 'lucide-react';
 import { Algorithm, Workflow } from '../types';
 import { database } from '../services/database';
 import Modal from './Modal';
