@@ -110,19 +110,24 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
       (p) => p.name && p.subParameters.length > 0
     );
 
-    const newAlgorithm: Algorithm = {
-      id: currentAlgorithmId || undefined, // Use undefined for new algorithms
+    const algorithmToSave: Algorithm = {
       name,
       description,
       parameters: validParameters,
       action,
       globalParameters: globalParameterValues,
-      created: editingAlgorithm?.created || new Date(),
+      created: new Date(),
       lastModified: new Date(),
     };
+    
+    // Only include ID if we're editing an existing algorithm
+    if (currentAlgorithmId) {
+      algorithmToSave.id = currentAlgorithmId;
+      algorithmToSave.created = editingAlgorithm?.created || new Date();
+    }
 
     database
-      .saveAlgorithm(newAlgorithm)
+      .saveAlgorithm(algorithmToSave)
       .then(() => {
         return database.getAlgorithms();
       })

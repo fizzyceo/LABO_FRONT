@@ -68,7 +68,7 @@ class DatabaseService {
     try {
       let response: Response;
       
-      if (algorithm.id) {
+      if (algorithm.id !== undefined && algorithm.id !== null) {
         // Update existing algorithm
         response = await fetch(`${this.baseUrl}/algorithms/${algorithm.id}`, {
           method: 'PUT',
@@ -82,7 +82,7 @@ class DatabaseService {
         });
       } else {
         // Create new algorithm
-        const newAlgorithm = {
+        const { id, ...newAlgorithm } = {
           ...algorithm,
           created: new Date(),
           lastModified: new Date()
