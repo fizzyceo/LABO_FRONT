@@ -23,7 +23,6 @@ const AlgorithmBuilder: React.FC<AlgorithmBuilderProps> = ({
   editingAlgorithm,
   onAlgorithmSaved,
 }) => {
-  const [currentAlgorithmId, setCurrentAlgorithmId] = useState<number | null>(null);
   const [currentAlgorithmId, setCurrentAlgorithmId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
