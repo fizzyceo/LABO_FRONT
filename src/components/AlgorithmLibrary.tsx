@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Plus, Calendar, Settings, Trash2, Copy } from 'lucide-react';
+import { Plus, Calendar, Settings, Trash2, Copy, MoreVertical } from 'lucide-react';
 import { Algorithm, Workflow } from '../types';
 import { database } from '../services/database';
 import { useToast } from '../hooks/useToast';
 import Modal from './Modal';
 import AlgorithmForm from './AlgorithmForm';
 import WorkflowForm from './WorkflowForm';
+import DuplicateAlgorithmModal from './DuplicateAlgorithmModal';
 
 interface AlgorithmLibraryProps {
   algorithms: Algorithm[];
@@ -26,6 +27,9 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
 }) => {
   const [showAlgorithmModal, setShowAlgorithmModal] = useState(false);
   const [showWorkflowModal, setShowWorkflowModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [algorithmToDuplicate, setAlgorithmToDuplicate] = useState<Algorithm | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const handleCreateAlgorithm = (algorithmData: any) => {
     const newAlgorithm: Algorithm = {
@@ -99,27 +103,53 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
     }
   };
 
-   const handleDuplicateAlgorithm = async (algorithm: Algorithm, event: React.MouseEvent) => {
-     event.stopPropagation();
-     
-     const duplicatedAlgorithm: Algorithm = {
-       ...algorithm,
-       id: undefined, // Remove ID so it creates a new one
-       name: `${algorithm.name} (Copy)`,
-       created: new Date(),
-       lastModified: new Date(),
-     };
-     
-     try {
-       await database.saveAlgorithm(duplicatedAlgorithm);
-       const updatedAlgorithms = await database.getAlgorithms();
-       setAlgorithms(updatedAlgorithms);
+  const handleDuplicateAlgorithm = async (customName: string) => {
+    if (!algorithmToDuplicate) return;
+    
+    const duplicatedAlgorithm: Algorithm = {
+      ...algorithmToDuplicate,
+      id: undefined, // Remove ID so it creates a new one
+      name: customName,
+      created: new Date(),
+      lastModified: new Date(),
+    };
+    
+    try {
+      await database.saveAlgorithm(duplicatedAlgorithm);
+      const updatedAlgorithms = await database.getAlgorithms();
+      setAlgorithms(updatedAlgorithms);
       toast.showSuccess('Algorithm Duplicated', `"${duplicatedAlgorithm.name}" has been created successfully`);
-     } catch (error) {
-       console.error('Error duplicating algorithm:', error);
+    } catch (error) {
+      console.error('Error duplicating algorithm:', error);
       toast.showError('Duplication Failed', 'Failed to duplicate algorithm. Please try again.');
-     }
-   };
+    }
+  };
+
+  const openDuplicateModal = (algorithm: Algorithm, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setAlgorithmToDuplicate(algorithm);
+    setShowDuplicateModal(true);
+    setOpenDropdown(null);
+  };
+
+  const toggleDropdown = (algorithmId: string | number | undefined, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const id = algorithmId?.toString() || '';
+    setOpenDropdown(openDropdown === id ? null : id);
+  };
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenDropdown(null);
+    };
+
+    if (openDropdown) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openDropdown]);
+
   return (
     <div className="space-y-8">
       {/* Algorithm Library */}
@@ -148,13 +178,34 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
                 >
                   {algorithm.name}
                 </h3>
-                <button
-                  onClick={(e) => handleDeleteAlgorithm(algorithm, e)}
-                  className="p-1 text-red-500 hover:bg-red-100 rounded transition-colors"
-                  title="Delete algorithm"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={(e) => toggleDropdown(algorithm.id, e)}
+                    className="p-1 text-gray-500 hover:bg-gray-100 rounded transition-colors"
+                    title="More options"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                  
+                  {openDropdown === algorithm.id?.toString() && (
+                    <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-[160px]">
+                      <button
+                        onClick={(e) => openDuplicateModal(algorithm, e)}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-t-lg"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Duplicate
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteAlgorithm(algorithm, e)}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-b-lg"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
               <div onClick={() => onEditAlgorithm(algorithm)}>
               <p className="text-gray-600 text-sm mb-4">{algorithm.description}</p>
@@ -250,6 +301,16 @@ const AlgorithmLibrary: React.FC<AlgorithmLibraryProps> = ({
           onCancel={() => setShowWorkflowModal(false)}
         />
       </Modal>
+
+      <DuplicateAlgorithmModal
+        isOpen={showDuplicateModal}
+        onClose={() => {
+          setShowDuplicateModal(false);
+          setAlgorithmToDuplicate(null);
+        }}
+        algorithm={algorithmToDuplicate}
+        onDuplicate={handleDuplicateAlgorithm}
+      />
     </div>
   );
 };
